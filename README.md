@@ -1,6 +1,6 @@
 # Audio Splitter
 
-A python script that splits a large audio file into individual `.mp3` tracks, using the excellent `pydub` module.
+A python script that splits a large audio file into individual ~~`.mp3`~~ `.m4a` <sup>stop using `.mp3`</sup> tracks, using the excellent `pydub` module.
 Requires that FFMPEG installed and in your `$PATH` variable.
 
 ## Usage:

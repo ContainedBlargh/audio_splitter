@@ -92,6 +92,7 @@ def split_audio(tracks: List[Track], audio_path, album_name):
         exporter = track_exporter(chunks[i], path, master, album_name)
         t = Thread(target=exporter)
         t.start()
+        threads.append(t)
     for t in threads:
         t.join()
     pass
