@@ -53,7 +53,7 @@ def chunk_list(seq: List, num: int):
     
     return out
 
-def track_exporter(tracks: List[Track], path: str, master: AudioSegment, album_name: str):
+def track_exporter(tracks: List[Track], path: str, master: AudioSegment, album_name: str, file_type: str):
     def export_tracks():
             for track in tracks:
                 segment = None
@@ -66,11 +66,11 @@ def track_exporter(tracks: List[Track], path: str, master: AudioSegment, album_n
                     'album': album_name,
                     'title': track.title
                 }
-                filename = f"{path}/{track.artist} - {track.title}.mp3"
+                filename = f"{path}/{track.artist} - {track.title}.{file_type}"
                 segment.export(filename, tags=tags)
     return export_tracks
 
-def split_audio(tracks: List[Track], audio_path, album_name):
+def split_audio(tracks: List[Track], audio_path, album_name, file_type):
     path = f"./{album_name}"
     if not os.path.exists(path):
         print(f"Creating album directory at '{path}'")
@@ -81,7 +81,7 @@ def split_audio(tracks: List[Track], audio_path, album_name):
     thread_count = multiprocessing.cpu_count() * 2
     
     if len(tracks) < 3: #For so few tracks, let's not parallelize.
-        single_exporter = track_exporter(tracks, path, master, album_name)
+        single_exporter = track_exporter(tracks, path, master, album_name, file_type)
         single_exporter()
         return
 
@@ -89,7 +89,7 @@ def split_audio(tracks: List[Track], audio_path, album_name):
     threads = []
     print("Exporting tracks, this may take a while...")
     for i in range(thread_count):
-        exporter = track_exporter(chunks[i], path, master, album_name)
+        exporter = track_exporter(chunks[i], path, master, album_name, file_type)
         t = Thread(target=exporter)
         t.start()
         threads.append(t)
@@ -98,14 +98,17 @@ def split_audio(tracks: List[Track], audio_path, album_name):
     pass
 
 def main(argv):
-    if (len(argv) != 4):
-        print("Usage of this program:\npython audio_splitter.py <trackinfo csv file> <audio file> <album name>")
+    file_type = 'mp3'
+    if (len(argv) < 4 or len(argv) > 5):
+        print("Usage of this program:\npython audio_splitter.py <trackinfo csv file> <audio file> <album name> <optional: file type (defaults to 'mp3')>")
         return
     trackinfo_path = argv[1]
     audio_path = argv[2]
     album_name = argv[3]
+    if len(argv) == 5:
+        file_type = argv[4]
     tracks = parse_tracks(trackinfo_path)
-    split_audio(tracks, audio_path, album_name)
+    split_audio(tracks, audio_path, album_name, file_type)
 
 if __name__ == "__main__":
     main(sys.argv)
